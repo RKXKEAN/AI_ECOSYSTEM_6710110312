@@ -1,6 +1,26 @@
 services:
+  # 1. บริการ PostgreSQL
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: students_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. บริการ Redis (แก้ไขโดยการแยกพอร์ตไม่ให้ชนเผื่อมีตัวอื่นรันในเครื่อง)
   redis:
-    image: redis:8.8.0-alpine
+    image: redis:7.2-alpine
     container_name: redis
     restart: unless-stopped
     ports:
@@ -15,44 +35,27 @@ services:
       timeout: 5s
       retries: 5
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: label_studio
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d label_studio"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # 3. บริการ Label Studio (เชื่อมกับ PostgreSQL)
   label-studio:
     image: heartexlabs/label-studio:latest
     container_name: label-studio
     restart: unless-stopped
     ports:
       - "8080:8080"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
     volumes:
       - label-studio-data:/label-studio/data
     environment:
-      DJANGO_DB: default
-      POSTGRES_NAME: label_studio
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_PORT: 5432
-      POSTGRES_HOST: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - DJANGO_DB=default
+      - POSTGRES_NAME=students_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=5432
 
 volumes:
+  postgresql-data:
   redis-data:
-  postgres-data:
   label-studio-data:
