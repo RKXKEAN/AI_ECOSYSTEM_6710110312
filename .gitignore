@@ -5,3 +5,4 @@ __pycache__/
 .env
 backend/.env
 .DS_Store
+sandbox/
