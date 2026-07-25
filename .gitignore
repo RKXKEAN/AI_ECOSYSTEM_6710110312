@@ -7,3 +7,5 @@ backend/.env
 .DS_Store
 sandbox/
 Photo/
+logss/
+export-logs.sh
