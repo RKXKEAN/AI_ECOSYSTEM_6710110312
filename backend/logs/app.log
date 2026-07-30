@@ -2,3 +2,4 @@
 {"timestamp": "2026-07-25T05:45:26.107385+00:00", "level": "WARNING", "logger": "demo", "message": "การเชื่อมต่อ database ช้ากว่าปกติ", "module": "logger", "line": 130, "extra_data": {"latency_ms": 850}}
 {"timestamp": "2026-07-25T05:45:26.107903+00:00", "level": "ERROR", "logger": "demo", "message": "อัปโหลดไฟล์ล้มเหลว", "module": "logger", "line": 131, "extra_data": {"bucket": "my-photos", "object": "kean.jpg"}}
 {"timestamp": "2026-07-25T05:45:26.108139+00:00", "level": "ERROR", "logger": "demo", "message": "เกิดข้อผิดพลาดที่ไม่คาดคิด", "module": "logger", "line": 136, "exception": "Traceback (most recent call last):\n  File \"D:\\AI_ECOSYSTEM\\PF_Waritorn\\AI_ECOSYSTEM_6710110312\\backend\\core\\logger.py\", line 134, in <module>\n    1 / 0\n    ~~^~~\nZeroDivisionError: division by zero"}
+{"timestamp": "2026-07-30T08:18:14.419111+00:00", "level": "INFO", "logger": "test", "message": "Test logger", "module": "<string>", "line": 1}

@@ -85,6 +85,31 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=MyBackend
+      - DEBUG=True
+      - DATABASE_URL=postgresql+psycopg2://admin:password123@postgres:5432/ai_database
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LABEL_STUDIO_URL=http://label-studio:8080
+      - LABEL_STUDIO_API_KEY=371dcdb2d27198b823438b40ca567d1e2d48c1da
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password123
+      - MINIO_BUCKET=my-photos
+      - MINIO_SECURE=false
+    depends_on:
+      minio:
+        condition: service_healthy
+
 volumes:
   redis-data:
   postgresql-data:

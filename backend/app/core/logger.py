@@ -17,7 +17,7 @@ Assignment 05 - System Logging ข้อ 1: Custom Logger ของโปรเ�
     6. Contextual Info - บันทึกชื่อ module/logger ที่มา เพื่อรู้ว่า log มาจากส่วนไหนของระบบ
 
 วิธีใช้:
-    from core.logger import get_logger
+    from app.core.logger import get_logger
 
     logger = get_logger(__name__)
     logger.info("Server started", extra={"extra_data": {"port": 8080}})
@@ -32,11 +32,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------- Config ----------
-LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
+LOG_DIR = Path(__file__).resolve().parent.parent.parent / "logs"
 LOG_FILE = LOG_DIR / "app.log"
 MAX_BYTES = 5 * 1024 * 1024   # 5 MB ต่อไฟล์ ก่อนจะ rotate
 BACKUP_COUNT = 5              # เก็บไฟล์เก่าไว้สูงสุด 5 ไฟล์
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+try:
+    from app.core.config import settings
+    LOG_LEVEL = settings.LOG_LEVEL.upper()
+except ImportError:
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 # -----------------------------
 
 

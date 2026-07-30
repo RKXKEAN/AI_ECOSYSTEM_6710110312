@@ -1,24 +1,17 @@
 import sys
-import os
-from pathlib import Path
-
-from dotenv import load_dotenv
 from minio import Minio
 from minio.error import S3Error
 from minio.versioningconfig import VersioningConfig, ENABLED
 
-# ---------- โหลด .env ----------
-ENV_PATH = Path(__file__).resolve().parent.parent / "backend" / ".env"
-load_dotenv(ENV_PATH)
+from app.core.config import settings
 
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "localhost:9000")
-MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "admin")
-MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "password123")
-MINIO_BUCKET = os.getenv("MINIO_BUCKET", "my-photos")
-MINIO_SECURE = os.getenv("MINIO_SECURE", "false").lower() == "true"
+MINIO_ENDPOINT = settings.MINIO_ENDPOINT
+MINIO_ACCESS_KEY = settings.MINIO_ACCESS_KEY
+MINIO_SECRET_KEY = settings.MINIO_SECRET_KEY
+MINIO_BUCKET = settings.MINIO_BUCKET_NAME
+MINIO_SECURE = settings.MINIO_SECURE
 
 OBJECT_NAME = "kean.jpg"  # ใช้ชื่อเดียวกันทุกครั้ง เพื่อทดสอบ versioning
-# --------------------------------
 
 
 def get_client() -> Minio:

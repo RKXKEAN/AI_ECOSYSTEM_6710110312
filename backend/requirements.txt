@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+minio
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+arq
+label-studio-sdk
+psycopg2-binary
+redis
+sqlalchemy
