@@ -1,8 +1,10 @@
 import os
 import tempfile
 from typing import Optional
+from datetime import timedelta
 
 from app.core.config import settings
+from app.core.logger import get_logger
 from app.core.minio_versioning import (
     get_client,
     enable_versioning,
@@ -10,6 +12,9 @@ from app.core.minio_versioning import (
     list_versions as core_list_versions,
     download_file as core_download_file,
 )
+
+# Initialize logger
+logger = get_logger(__name__)
 
 # Initialize MinIO Client
 client = get_client()
@@ -20,7 +25,7 @@ try:
         client.make_bucket(settings.MINIO_BUCKET_NAME)
     enable_versioning(client, settings.MINIO_BUCKET_NAME)
 except Exception as e:
-    print(f"[-] Failed to auto-initialize MinIO bucket or versioning: {e}")
+    logger.error(f"Failed to auto-initialize MinIO bucket or versioning: {e}")
 
 
 def upload_file(file_bytes: bytes, filename: str) -> str:
@@ -105,3 +110,76 @@ def get_file(object_id: str, version_id: Optional[str] = None) -> bytes:
             os.remove(temp_path)
 
     return content
+
+
+def list_objects() -> list:
+    """
+    List all objects in the default MinIO bucket.
+    """
+    try:
+        bucket_name = settings.MINIO_BUCKET_NAME
+        objects = client.list_objects(bucket_name)
+        
+        result = []
+        for o in objects:
+            result.append({
+                "object_name": o.object_name,
+                "size": o.size,
+                "last_modified": o.last_modified.isoformat() if o.last_modified else None
+            })
+            
+        logger.info(f"Successfully listed {len(result)} objects in bucket '{bucket_name}'")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to list objects in bucket: {str(e)}")
+        raise e
+
+
+def create_bucket(bucket_name: str) -> bool:
+    """
+    Create a new MinIO bucket.
+    Raises ValueError if the bucket already exists.
+    """
+    try:
+        if client.bucket_exists(bucket_name):
+            logger.error(f"Failed to create bucket: '{bucket_name}' already exists")
+            raise ValueError(f"Bucket '{bucket_name}' already exists")
+        
+        client.make_bucket(bucket_name)
+        logger.info(f"Bucket '{bucket_name}' created successfully")
+        return True
+    except ValueError as ve:
+        raise ve
+    except Exception as e:
+        logger.error(f"Failed to create bucket '{bucket_name}': {str(e)}")
+        raise e
+
+
+def generate_presigned_url(object_name: str, method: str, expires_minutes: int = 60) -> str:
+    """
+    Generate a presigned URL for upload (PUT) or download (GET) for an object in MinIO.
+    """
+    try:
+        bucket_name = settings.MINIO_BUCKET_NAME
+        expires = timedelta(minutes=expires_minutes)
+        
+        if method == "upload":
+            url = client.presigned_put_object(
+                bucket_name=bucket_name,
+                object_name=object_name,
+                expires=expires
+            )
+        elif method == "download":
+            url = client.presigned_get_object(
+                bucket_name=bucket_name,
+                object_name=object_name,
+                expires=expires
+            )
+        else:
+            raise ValueError(f"Invalid method: {method}")
+            
+        logger.info(f"Generated presigned {method} URL for '{object_name}' in bucket '{bucket_name}' (expires: {expires_minutes}m)")
+        return url
+    except Exception as e:
+        logger.error(f"Failed to generate presigned {method} URL for '{object_name}': {str(e)}")
+        raise e
