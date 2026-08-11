@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from app.api.v1.routers import storage, auth, health, inference, training, annotation, models
+from app.api.v1.routers import storage, auth, health, inference, training, annotation, models, data
 from app.core.database import engine, Base
 from app.models.user import User
 from app.models.model_registry import Model, ModelVersion
+from app.models.dataset import Dataset
 
 Base.metadata.create_all(bind=engine)
 
@@ -14,6 +15,7 @@ tags_metadata = [
     {"name": "Training", "description": "จัดการ Pipeline การฝึกสอนโมเดล ผ่านระบบคิวงานเบื้องหลัง (arq + redis)"},
     {"name": "Annotation", "description": "เชื่อมต่อ Label Studio เพื่อดึงข้อมูล Project และ Task สำหรับการติดป้ายกำกับข้อมูล"},
     {"name": "Model Registry", "description": "จัดการเวอร์ชันของโมเดล AI และ Metadata การประเมินผล"},
+    {"name": "Data Management", "description": "จัดการการนำเข้าและรายการชุดข้อมูล (Dataset) ของระบบ"},
 ]
 
 app = FastAPI(
@@ -38,11 +40,13 @@ app.include_router(inference.router, prefix="/api/v1")
 app.include_router(training.router, prefix="/api/v1")
 app.include_router(annotation.router, prefix="/api/v1")
 app.include_router(models.router)
+app.include_router(data.router)
 
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
 
 
 
