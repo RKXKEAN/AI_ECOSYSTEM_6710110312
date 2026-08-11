@@ -9,9 +9,11 @@ dependencies = [
     "bcrypt<4.1",
     "label-studio-sdk>=2.1.0",
     "minio>=7.2.20",
+    "openpyxl>=3.1.5",
     "psycopg2-binary>=2.9.12",
     "pydantic-settings>=2.14.2",
     "python-multipart>=0.0.32",
     "redis>=5.3.1",
+    "requests>=2.34.2",
     "sqlalchemy>=2.0.51",
 ]
