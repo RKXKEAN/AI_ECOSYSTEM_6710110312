@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.schemas.training import TrainingJobRequest, TrainingJobResponse, TrainingJobStatus
 from app.services.training_service import create_job, get_job_status
 
-router = APIRouter(prefix="/training", tags=["training"])
+router = APIRouter(prefix="/training", tags=["Training"])
 
 @router.post("/jobs", response_model=TrainingJobResponse)
 def post_create_job(request: TrainingJobRequest):

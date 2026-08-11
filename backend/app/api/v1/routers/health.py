@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from app.core.minio_versioning import get_client, MINIO_BUCKET
 
-router = APIRouter(tags=["health"])
+router = APIRouter(tags=["Health"])
 
 @router.get("/health")
 def get_health():

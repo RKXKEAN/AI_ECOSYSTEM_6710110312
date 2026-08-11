@@ -4,7 +4,7 @@ from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
 from app.services.auth_service import authenticate_user, get_user_by_username
 from app.core.security import create_access_token, verify_token
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 # Define security scheme using HTTPBearer
 security_scheme = HTTPBearer()

@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from app.services.storage_service import upload_file, list_versions, get_file
 from app.schemas.storage import UploadResponse, VersionsResponse
 
-router = APIRouter(prefix="/storage", tags=["storage"])
+router = APIRouter(prefix="/storage", tags=["Storage"])
 
 @router.post("/upload", response_model=UploadResponse)
 async def upload_storage_file(file: UploadFile = File(...)):

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.schemas.inference import ModelInfo, PredictRequest, PredictResponse
 from app.services.inference_service import list_models, predict
 
-router = APIRouter(prefix="/inference", tags=["inference"])
+router = APIRouter(prefix="/inference", tags=["Inference"])
 
 @router.get("/models", response_model=list[ModelInfo])
 def get_models():
