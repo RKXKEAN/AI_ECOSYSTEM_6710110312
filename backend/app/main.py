@@ -5,6 +5,7 @@ from app.models.user import User
 from app.models.model_registry import Model, ModelVersion
 from app.models.dataset import Dataset
 from app.models.feedback import Feedback
+from app.models.training_job import TrainingJob
 
 Base.metadata.create_all(bind=engine)
 
