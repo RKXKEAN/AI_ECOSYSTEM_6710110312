@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from app.api.v1.routers import storage, auth, health, inference, training
+from app.core.database import engine, Base
+from app.models.user import User
+
+Base.metadata.create_all(bind=engine)
 
 tags_metadata = [
     {"name": "Auth", "description": "จัดการการยืนยันตัวตนผู้ใช้ ลงทะเบียน เข้าสู่ระบบ และออก JWT Token"},

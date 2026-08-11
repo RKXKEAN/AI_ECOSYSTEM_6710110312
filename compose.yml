@@ -32,6 +32,7 @@ services:
       - "5432:5432"
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
     logging:
       driver: json-file
       options:
@@ -96,7 +97,7 @@ services:
     environment:
       - APP_NAME=MyBackend
       - DEBUG=True
-      - DATABASE_URL=postgresql+psycopg2://admin:password123@postgres:5432/ai_database
+      - DATABASE_URL=postgresql+psycopg2://admin:password123@postgres:5432/ai_backend
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LABEL_STUDIO_URL=http://label-studio:8080
