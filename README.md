@@ -114,7 +114,7 @@ scripts/                 # สคริปต์เครื่องมือ�
    uv run arq app.worker.tasks.WorkerSettings
    ```
 
-### F. รายชื่อ API ทั้ง 8 Domain และหน้าเอกสาร
+### F. รายชื่อ API ทั้งหมด และหน้าเอกสาร
 สามารถเข้าใช้งานระบบทดสอบและตรวจสอบการทำงานของ API ได้ที่หน้า Swagger UI:
 - **Swagger Documentation UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc Documentation UI**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
@@ -233,6 +233,6 @@ Exposes HTTP endpoints and routes them to service operations:
    ```
 
 ### F. API Domains and Documentation Link
-The API endpoints are organized into 8 domains, checkable via Swagger UI:
+The API endpoints are organized into all domains, checkable via Swagger UI:
 - **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc UI**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
