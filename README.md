@@ -17,27 +17,27 @@
 4. **Models (models/)**: นิยามโครงสร้างตารางข้อมูลเพื่อทำ Object-Relational Mapping (ORM) ผ่าน SQLAlchemy เข้ากับฐานข้อมูล PostgreSQL
 5. **Core (core/)**: ระบบโครงสร้างพื้นฐานและการตั้งค่าส่วนกลาง (Infrastructure & Configurations)
 
-### C. แผนผังโครงสร้างโฟลเดอร์แบบย่อ (Folder Structure)
+### C. Folder Structure Diagram
 ```text
 backend/
 ├── app/
-│   ├── api/v1/routers/  # เลเยอร์รับส่ง HTTP Requests
-│   ├── core/            # ระบบส่วนกลางและการตั้งค่า (DB, Logging, MinIO, Security)
-│   ├── models/          # โครงสร้างตาราง SQLAlchemy ORM
-│   ├── schemas/         # โมเดลตรวจสอบข้อมูล Pydantic
-│   ├── services/        # โลจิกทางธุรกิจของระบบ
-│   ├── worker/          # โค้ดสำหรับงานเบื้องหลัง arq worker
-│   ├── tests/           # Unit tests ต่อโดเมน
-│   └── main.py          # ไฟล์ทางเข้าหลักของแอปพลิเคชัน FastAPI
-├── logs/                # ที่เก็บไฟล์ app.log (JSON format)
-├── .env.example         # ตัวอย่างตัวแปรสภาพแวดล้อมที่ต้องตั้งค่า
-├── pyproject.toml       # รายการ dependency ที่จัดการด้วย uv
-├── uv.lock              # ล็อกเวอร์ชัน dependency แบบละเอียด
-└── README.md            # เอกสารประกอบการใช้งานโปรเจกต์
-sandbox/                 # สคริปต์สำหรับทดสอบระบบก่อนย้ายเข้า backend จริง
-scripts/                 # สคริปต์เครื่องมือแปลงข้อมูล (openapi_to_csv.py)
-postgres-init/           # SQL script แยกฐานข้อมูล backend ออกจาก Label Studio
-compose.yml              # ไฟล์ Docker Compose สำหรับรันระบบทั้งหมด
+│   ├── api/v1/routers/  # HTTP router layer
+│   ├── core/            # Infrastructure setup (DB, log formatters, MinIO, security)
+│   ├── models/          # SQLAlchemy model layer
+│   ├── schemas/         # Pydantic schemas
+│   ├── services/        # Business logic operations
+│   ├── worker/          # Background worker tasks (arq)
+│   ├── tests/           # Unit tests per domain
+├── logs/                # Storage folder for app.log (structured JSON)
+├── main.py              # FastAPI application entrypoint
+├── .env.example         # Example of required environment variables
+├── pyproject.toml       # Dependency list managed by uv.
+├── uv.lock              # Exact dependency version lockfile
+sandbox/                 # Sandbox scripts, prototypes before promotion into backend/
+scripts/                 # Utility scripts (openapi_to_csv.py)
+postgres-init/           # SQL script separating backend DB from Label Studio's
+compose.yml              # Docker Compose orchestration file
+README.md                # Project main guide
 ```
 
 ### D. รายละเอียดแยกตาม Component หลัก
