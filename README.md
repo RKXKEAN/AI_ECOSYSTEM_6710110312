@@ -172,7 +172,7 @@ backend/
 ├── logs/                # Storage folder for app.log (structured JSON)
 ├── main.py              # FastAPI application entrypoint
 ├── .env.example         # Example of required environment variables
-├── pyproject.toml       # Dependency list managed by uv
+├── pyproject.toml       # Dependency list managed by uv.
 ├── uv.lock              # Exact dependency version lockfile
 sandbox/                 # Sandbox scripts, prototypes before promotion into backend/
 scripts/                 # Utility scripts (openapi_to_csv.py)
