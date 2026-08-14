@@ -27,12 +27,17 @@ backend/
 │   ├── schemas/         # โมเดลตรวจสอบข้อมูล Pydantic
 │   ├── services/        # โลจิกทางธุรกิจของระบบ
 │   ├── worker/          # โค้ดสำหรับงานเบื้องหลัง arq worker
+│   ├── tests/           # Unit tests ต่อโดเมน
 │   └── main.py          # ไฟล์ทางเข้าหลักของแอปพลิเคชัน FastAPI
 ├── logs/                # ที่เก็บไฟล์ app.log (JSON format)
-├── sandbox/             # สคริปต์สำหรับทดสอบระบบ
-├── compose.yml          # ไฟล์ Docker Compose สำหรับรันระบบทดสอบ
+├── .env.example         # ตัวอย่างตัวแปรสภาพแวดล้อมที่ต้องตั้งค่า
+├── pyproject.toml       # รายการ dependency ที่จัดการด้วย uv
+├── uv.lock              # ล็อกเวอร์ชัน dependency แบบละเอียด
 └── README.md            # เอกสารประกอบการใช้งานโปรเจกต์
-scripts/                 # สคริปต์เครื่องมือแปลงข้อมูล
+sandbox/                 # สคริปต์สำหรับทดสอบระบบก่อนย้ายเข้า backend จริง
+scripts/                 # สคริปต์เครื่องมือแปลงข้อมูล (openapi_to_csv.py)
+postgres-init/           # SQL script แยกฐานข้อมูล backend ออกจาก Label Studio
+compose.yml              # ไฟล์ Docker Compose สำหรับรันระบบทั้งหมด
 ```
 
 ### D. รายละเอียดแยกตาม Component หลัก
@@ -95,7 +100,25 @@ scripts/                 # สคริปต์เครื่องมือ�
 #### 7. Scripts Layer (`scripts/`)
 - `openapi_to_csv.py`: สคริปต์เสริมสำหรับแปลงไฟล์ `openapi.json` ไปเป็นเอกสาร CSV และ Excel (.xlsx) เพื่อใช้สรุปรายชื่อ Endpoints ของระบบ จัดเก็บไว้ที่โฟลเดอร์ `docs/api-snapshots/` โดยเรียกใช้ไลบรารี `requests` และ `openpyxl`
 
-### E. วิธีการรันโปรเจกต์ทั้งหมด (Running Instructions)
+### E. การติดตั้งโปรเจกต์ (Getting Started)
+
+**สิ่งที่ต้องมีก่อน (Prerequisites):**
+- Docker และ Docker Compose
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+
+**ขั้นตอน Clone และติดตั้ง:**
+```bash
+git clone https://github.com/RKXKEAN/AI_ECOSYSTEM_6710110312.git
+cd AI_ECOSYSTEM_6710110312/backend
+cp .env.example .env
+uv sync
+```
+คำสั่ง `uv sync` จะติดตั้ง dependency ทั้งหมดตามที่ล็อกไว้ใน `uv.lock` ให้อัตโนมัติ พร้อมสร้าง `.venv` ให้เอง (ไม่ต้องใช้ `pip install -r requirements.txt`)
+
+แก้ไขค่าใน `backend/.env` ให้ตรงกับสภาพแวดล้อมจริงของเครื่อง โดยเฉพาะ `LABEL_STUDIO_API_KEY` และรหัสผ่านต่าง ๆ
+
+### F. วิธีการรันโปรเจกต์ทั้งหมด (Running Instructions)
 1. **เริ่มรันบริการพื้นฐาน (Docker Containers)**:
    ```bash
    docker-compose up -d
@@ -114,14 +137,14 @@ scripts/                 # สคริปต์เครื่องมือ�
    uv run arq app.worker.tasks.WorkerSettings
    ```
 
-### F. รายชื่อ API ทั้งหมด และหน้าเอกสาร
+### G. รายชื่อ API ทั้งหมด และหน้าเอกสาร
 สามารถเข้าใช้งานระบบทดสอบและตรวจสอบการทำงานของ API ได้ที่หน้า Swagger UI:
 - **Swagger Documentation UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc Documentation UI**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ---
 
-## 🇬🇧 English Version (English Version)
+## 🇬🇧 English Version
 
 ### A. Project Overview
 This project is the backend API service for an artificial intelligence ecosystem (AI Ecosystem), built with FastAPI and Python 3.13. It supports the lifecycle management of AI models, including dataset ingestion, system logging and feedback monitoring, model version registry, background task queue training, and inference serving.
@@ -145,12 +168,17 @@ backend/
 │   ├── schemas/         # Pydantic schemas
 │   ├── services/        # Business logic operations
 │   ├── worker/          # Background worker tasks (arq)
-│   └── main.py          # FastAPI application entrypoint
+│   ├── tests/           # Unit tests per domain
 ├── logs/                # Storage folder for app.log (structured JSON)
-├── sandbox/             # Scripts for sandbox testing
-├── compose.yml          # Infrastructure docker orchestration file
-└── README.md            # Project main guide
-scripts/                 # Automated scripts
+├── main.py              # FastAPI application entrypoint
+├── .env.example         # Example of required environment variables
+├── pyproject.toml       # Dependency list managed by uv
+├── uv.lock              # Exact dependency version lockfile
+sandbox/                 # Sandbox scripts, prototypes before promotion into backend/
+scripts/                 # Utility scripts (openapi_to_csv.py)
+postgres-init/           # SQL script separating backend DB from Label Studio's
+compose.yml              # Docker Compose orchestration file
+README.md                # Project main guide
 ```
 
 ### D. Component breakdown
@@ -213,7 +241,25 @@ Exposes HTTP endpoints and routes them to service operations:
 #### 7. Scripts Layer (`scripts/`)
 - `openapi_to_csv.py`: Generates flat API endpoints reports and exports them to `.csv` and `.xlsx` worksheets inside `docs/api-snapshots/` utilizing `requests` and `openpyxl` libraries.
 
-### E. Running Instructions
+### E. Getting Started
+
+**Prerequisites:**
+- Docker and Docker Compose
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+
+**Clone and Install:**
+```bash
+git clone https://github.com/RKXKEAN/AI_ECOSYSTEM_6710110312.git
+cd AI_ECOSYSTEM_6710110312/backend
+cp .env.example .env
+uv sync
+```
+`uv sync` installs every dependency pinned in `uv.lock` and creates the `.venv` automatically (no `pip install -r requirements.txt` needed).
+
+Edit `backend/.env` with values matching your local environment, especially `LABEL_STUDIO_API_KEY` and any passwords.
+
+### F. Running Instructions
 1. **Launch Infrastructure Services (Docker Containers)**:
    ```bash
    docker-compose up -d
@@ -232,7 +278,7 @@ Exposes HTTP endpoints and routes them to service operations:
    uv run arq app.worker.tasks.WorkerSettings
    ```
 
-### F. API Domains and Documentation Link
+### G. API Domains and Documentation Link
 The API endpoints are organized into all domains, checkable via Swagger UI:
 - **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc UI**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
