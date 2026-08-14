@@ -1,0 +1,33 @@
+﻿Method,Path,Tag,Summary,Description
+GET,/health,-,Health Check,-
+GET,/api/v1/annotation/projects,Annotation,Get Projects,-
+GET,/api/v1/annotation/projects/{project_id}/tasks,Annotation,Get Project Tasks,-
+GET,/api/v1/auth/admin-only,Auth,Get Admin Only,-
+POST,/api/v1/auth/login,Auth,Login,-
+GET,/api/v1/auth/me,Auth,Get Me,-
+POST,/api/v1/auth/register,Auth,Register,-
+GET,/api/v1/auth/users/admin-only,Auth,Get Users Admin Only,-
+GET,/api/v1/auth/users/me,Auth,Get Users Me,-
+GET,/api/v1/data/datasets,Data Management,Get Datasets,Retrieve list of all datasets.
+POST,/api/v1/data/ingest,Data Management,Ingest,Ingest a new dataset by registering its name and storage path.
+GET,/api/v1/health,Health,Get Health,เช็คว่า service รันอยู่ (ไม่ต้องเช็คอะไรซับซ้อน)
+GET,/api/v1/health/ready,Health,Get Health Ready,เช็ค readiness แบบละเอียด ลอง connect ไปยัง MinIO
+GET,/api/v1/inference/models,Inference,Get Models,ดึงรายชื่อ model ทั้งหมด
+POST,/api/v1/inference/predict,Inference,Post Predict,ทำนายผลด้วยโมเดลที่เลือก
+POST,/api/v1/models/register,Model Registry,Register,Register a new model in the registry (automatically creates version v1).
+POST,/api/v1/models/{id}/deploy,Model Registry,Deploy Model Version,Deploy the specified model version.
+PUT,/api/v1/models/{id}/metrics,Model Registry,Update Model Metrics,Update evaluation metrics for a specific model version.
+GET,/api/v1/models/{model_id}/versions,Model Registry,Get Model Versions,Retrieve all versions of the specified model.
+GET,/api/v1/monitoring/dashboard,Monitoring,Get Dashboard Metrics,Retrieve system dashboard metrics.
+GET,/api/v1/monitoring/drift,Monitoring,Get Drift Status,Retrieve model drift status.
+POST,/api/v1/monitoring/feedback,Monitoring,Post Feedback,Submit user feedback on a specific prediction.
+GET,/api/v1/monitoring/logs,Monitoring,Get System Logs,Retrieve system logs from app.log (most recent entries first).
+POST,/api/v1/storage/buckets,Storage,Create Storage Bucket,-
+GET,/api/v1/storage/objects,Storage,Get Objects,-
+POST,/api/v1/storage/presigned-url,Storage,Get Presigned Url,-
+POST,/api/v1/storage/upload,Storage,Upload Storage File,-
+GET,/api/v1/storage/{object_name},Storage,Download Storage File,-
+GET,/api/v1/storage/{object_name}/versions,Storage,Get File Versions,-
+POST,/api/v1/training/jobs,Training,Post Create Job,สร้าง Training Job ใหม่
+GET,/api/v1/training/jobs/{job_id},Training,Get Job,ดึงสถานะความคืบหน้าของ Training Job
+GET,/api/v1/training/jobs/{job_id}/metrics,Training,Get Job Metrics Endpoint,ดึงสถานะความคืบหน้าของ Training Job

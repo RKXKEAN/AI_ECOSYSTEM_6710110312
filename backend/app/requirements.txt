@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-pydantic-settings
-minio
-python-dotenv
-python-multipart
-python-jose[cryptography]
-passlib[bcrypt]
