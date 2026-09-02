@@ -11,3 +11,5 @@ class TrainingJob(Base):
     hyperparameters = Column(JSON, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
+    scheduled_at = Column(DateTime, nullable=True)
+    dataset_name = Column(String, nullable=True)

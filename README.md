@@ -94,8 +94,8 @@ README.md                # Project main guide
 | `inference.py` | `/inference` | `Inference` | ลิสต์โมเดลที่รันอินเฟอเรนซ์ได้ และประมวลผลคำนวณผลลัพธ์โมเดล |
 | `health.py` | `/health` | `Health` | ตรวจสอบสถานะการเชื่อมต่อบริการภายนอก (MinIO, etc.) |
 
-#### 6. Worker Layer (`worker/`)
-- `tasks.py`: บรรจุคิวงาน `train_model_task` สำหรับจำลองการฝึกโมเดล (10 วินาที) โดยแยก process การทำงานออกจาก FastAPI process หลัก เพื่อป้องกันการบล็อกการทำงาน (Non-blocking execution) และเชื่อมต่อผ่าน Redis โดยใช้ `arq`
+#### 6. Worker Layer (`trainer/`)
+- `worker.py`: บรรจุคิวงาน `train_token_classification_task` สำหรับประมวลผลการฝึกสอนโมเดลโดยแยกคิวงานออกจาก FastAPI ไปประมวลผลบน GPU Container
 
 #### 7. Scripts Layer (`scripts/`)
 - `openapi_to_csv.py`: สคริปต์เสริมสำหรับแปลงไฟล์ `openapi.json` ไปเป็นเอกสาร CSV และ Excel (.xlsx) เพื่อใช้สรุปรายชื่อ Endpoints ของระบบ จัดเก็บไว้ที่โฟลเดอร์ `docs/api-snapshots/` โดยเรียกใช้ไลบรารี `requests` และ `openpyxl`
@@ -131,10 +131,10 @@ uv sync
    uv run uvicorn app.main:app --reload
    ```
 
-3. **เริ่มระบบ ARQ Worker (ประมวลผลงานคิวเบื้องหลัง)**:
+3. **เริ่มระบบ ARQ Worker (Trainer Worker)**:
    ```bash
-   cd backend
-   uv run arq app.worker.tasks.WorkerSettings
+   cd trainer
+   uv run arq worker.WorkerSettings
    ```
 
 ### G. รายชื่อ API ทั้งหมด และหน้าเอกสาร
@@ -235,8 +235,8 @@ Exposes HTTP endpoints and routes them to service operations:
 | `inference.py` | `/inference` | `Inference` | Exposes model list and computes mock inference predictions. |
 | `health.py` | `/health` | `Health` | Reports connectivity health indicators for database, MinIO, and internal nodes. |
 
-#### 6. Worker Layer (`worker/`)
-- `tasks.py`: Contains the `train_model_task` which runs async tasks independently of the FastAPI web server using `arq` and Redis to prevent blocking the HTTP execution thread.
+#### 6. Worker Layer (`trainer/`)
+- `worker.py`: Contains the `train_token_classification_task` which runs training jobs independently on the GPU worker container using `arq` and Redis.
 
 #### 7. Scripts Layer (`scripts/`)
 - `openapi_to_csv.py`: Generates flat API endpoints reports and exports them to `.csv` and `.xlsx` worksheets inside `docs/api-snapshots/` utilizing `requests` and `openpyxl` libraries.
@@ -272,10 +272,10 @@ Edit `backend/.env` with values matching your local environment, especially `LAB
    uv run uvicorn app.main:app --reload
    ```
 
-3. **Launch the ARQ Worker (Job Queue Consumer)**:
+3. **Launch the ARQ Worker (Trainer Worker)**:
    ```bash
-   cd backend
-   uv run arq app.worker.tasks.WorkerSettings
+   cd trainer
+   uv run arq worker.WorkerSettings
    ```
 
 ### G. API Domains and Documentation Link

@@ -12,6 +12,8 @@ logger = get_logger(__name__)
 async def post_create_job(request: TrainingJobRequest, db: Session = Depends(get_db)):
     """
     สร้าง Training Job ใหม่
+    
+    งานนี้ประมวลผลโดย Trainer Worker (GPU Container) เพียงผู้เดียว
     """
     try:
         hyperparameters = {
@@ -19,9 +21,18 @@ async def post_create_job(request: TrainingJobRequest, db: Session = Depends(get
             "epochs": request.epochs,
             "model_name": request.model_name
         }
-        job = await enqueue_training(db, hyperparameters)
+        job = await enqueue_training(
+            db=db,
+            hyperparameters=hyperparameters,
+            dataset_name=request.dataset_name,
+            scheduled_at=request.scheduled_at
+        )
         logger.info(f"API: Enqueued job {job.job_id} successfully")
-        return TrainingJobResponse(job_id=job.job_id, status=job.status)
+        return TrainingJobResponse(
+            job_id=job.job_id,
+            status=job.status,
+            scheduled_at=job.scheduled_at
+        )
     except Exception as e:
         logger.error(f"API: Failed to enqueue training job: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

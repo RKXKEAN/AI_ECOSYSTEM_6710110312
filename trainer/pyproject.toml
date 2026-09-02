@@ -1,0 +1,26 @@
+[project]
+name = "trainer"
+version = "0.1.0"
+description = "Trainer worker for model training on GPU"
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate",
+    "arq>=0.28.0",
+    "datasets",
+    "minio",
+    "psycopg2-binary",
+    "python-dotenv",
+    "redis",
+    "seqeval",
+    "sqlalchemy",
+    "torch",
+    "transformers",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }

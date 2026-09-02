@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from typing import Optional
 from sqlalchemy.orm import Session
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -8,7 +10,12 @@ from app.core.logger import get_logger
 
 logger = get_logger(__name__)
 
-async def enqueue_training(db: Session, hyperparameters: dict) -> TrainingJob:
+async def enqueue_training(
+    db: Session,
+    hyperparameters: dict,
+    dataset_name: str,
+    scheduled_at: Optional[datetime] = None
+) -> TrainingJob:
     """
     Register a training job in the database, queue it in arq/redis, and update the DB with arq's job ID.
     """
@@ -17,7 +24,9 @@ async def enqueue_training(db: Session, hyperparameters: dict) -> TrainingJob:
     db_job = TrainingJob(
         job_id=temp_id,
         status="queued",
-        hyperparameters=hyperparameters
+        hyperparameters=hyperparameters,
+        dataset_name=dataset_name,
+        scheduled_at=scheduled_at
     )
     try:
         db.add(db_job)
@@ -33,15 +42,25 @@ async def enqueue_training(db: Session, hyperparameters: dict) -> TrainingJob:
         redis = await create_pool(
             RedisSettings(host=settings.REDIS_HOST, port=settings.REDIS_PORT)
         )
-        # Enqueue train_model_task with db_job.id and hyperparameters
-        arq_job = await redis.enqueue_job("train_model_task", db_job.id, hyperparameters)
+        # Enqueue train_token_classification_task with db_job.id and hyperparameters
+        enqueue_kwargs = {}
+        if scheduled_at is not None:
+            enqueue_kwargs["_defer_until"] = scheduled_at
+            
+        arq_job = await redis.enqueue_job(
+            "train_token_classification_task",
+            db_job.id,
+            hyperparameters,
+            **enqueue_kwargs
+        )
         
         # 3. Update database with the actual arq job ID
         db_job.job_id = arq_job.job_id
         db.commit()
         db.refresh(db_job)
         
-        logger.info(f"Training job successfully enqueued: DB ID={db_job.id}, ARQ Job ID={arq_job.job_id}")
+        start_time_log = scheduled_at.isoformat() if scheduled_at else "immediately"
+        logger.info(f"Training job successfully enqueued: DB ID={db_job.id}, ARQ Job ID={arq_job.job_id}, Dataset={dataset_name}, Starts={start_time_log}")
         return db_job
     except Exception as e:
         db.rollback()
