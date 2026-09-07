@@ -115,6 +115,7 @@ services:
     build:
       context: ./trainer
       dockerfile: Dockerfile
+    container_name: trainer-worker
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
