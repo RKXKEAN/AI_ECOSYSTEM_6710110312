@@ -1,3 +1,5 @@
+import uuid
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -17,23 +19,28 @@ def test_health_ready():
     else:
         assert response.json() == {"status": "degraded", "minio": "unreachable"}
 
-def test_inference():
+@patch("app.services.inference_service.create_pool")
+def test_inference(mock_pool):
+    mock_redis = AsyncMock()
+    mock_job = AsyncMock()
+    mock_job.job_id = f"mock-new-features-{uuid.uuid4()}"
+    mock_redis.enqueue_job.return_value = mock_job
+    mock_pool.return_value = mock_redis
+
     response = client.get("/api/v1/inference/models")
     assert response.status_code == 200
     models = response.json()
     assert isinstance(models, list)
     assert any(m["name"] == "default" for m in models)
     
-    response = client.post("/api/v1/inference/predict", json={"input_text": "hello", "model_name": "default"})
+    response = client.post("/api/v1/inference/predict", json={"text": "hello", "model_version": "1"})
     assert response.status_code == 200
     data = response.json()
-    assert data["model_name"] == "default"
-    assert "prediction" in data
-    assert 0.7 <= data["confidence"] <= 0.99
+    assert data["job_id"] == mock_job.job_id
+    assert data["status"] == "queued"
     
-    response = client.post("/api/v1/inference/predict", json={"input_text": "hello", "model_name": "unknown-model"})
+    response = client.get("/api/v1/inference/jobs/non-existent-mock-id")
     assert response.status_code == 404
-    assert response.json()["detail"] == "model not found"
 
 def test_training():
     response = client.post("/api/v1/training/jobs", json={"dataset_name": "mnist", "epochs": 5})

@@ -2,15 +2,17 @@ import os
 import shutil
 import logging
 from arq.connections import RedisSettings
+from arq.worker import func
 from dotenv import load_dotenv
 
-from db import update_job_status
+from db import update_job_status, update_inference_job_status
 from train import (
     setup_logger,
     download_dataset_from_minio,
     train_ner_model,
     upload_model_to_minio,
 )
+from inference import predict_ner
 
 load_dotenv()
 
@@ -94,10 +96,67 @@ async def train_token_classification_task(
                 logger.warning(f"Could not clean up temporary dataset dir: {clean_err}")
 
 
+async def run_inference_task(
+    ctx: dict,
+    job_db_id: int,
+    input_text: str,
+    model_version: str | None = None,
+    **kwargs
+) -> dict:
+    """
+    ARQ Background Worker task for Token Classification (NER) inference.
+    Loads registered model from MLflow and performs predictions on GPU/CPU.
+    """
+    job_id = ctx.get("job_id") or str(job_db_id)
+    logger = setup_logger(job_id)
+    logger.info(f"=== Starting Inference Job: {job_id} (DB ID: {job_db_id}) ===")
+
+    # 1. Update status to 'running'
+    try:
+        update_inference_job_status(job_id, "running")
+        logger.info(f"Status updated to 'running' for inference job {job_id}")
+    except Exception as e:
+        logger.error(f"Failed to update database status to 'running': {e}")
+
+    try:
+        # 2. Run Inference
+        logger.info(f"Running NER inference for input_text (len={len(input_text)}), model_version={model_version}")
+        predictions, resolved_version = predict_ner(
+            input_text=input_text,
+            model_version=model_version,
+            model_name="ner-conll2003"
+        )
+        logger.info(f"Inference completed using model version '{resolved_version}'. Extracted {len(predictions)} token entities.")
+
+        # 3. Update status to 'complete' and save result
+        update_inference_job_status(job_id, "complete", result=predictions)
+        logger.info(f"=== Inference Job {job_id} finished successfully (status=complete) ===")
+
+        return {
+            "job_id": job_id,
+            "status": "complete",
+            "model_version": resolved_version,
+            "result": predictions,
+        }
+
+    except Exception as e:
+        logger.exception(f"Inference job {job_id} failed with error: {e}")
+        try:
+            update_inference_job_status(job_id, "failed", result={"error": str(e)})
+            logger.info(f"Status updated to 'failed' for inference job {job_id}")
+        except Exception as db_err:
+            logger.error(f"Failed to update database status to 'failed': {db_err}")
+        raise e
+
+
 class WorkerSettings:
-    functions = [train_token_classification_task]
+    functions = [
+        train_token_classification_task,
+        func(run_inference_task, name="run_inference_task", timeout=120)
+    ]
     redis_settings = RedisSettings(
         host=os.getenv("REDIS_HOST", "redis"),
         port=int(os.getenv("REDIS_PORT", "6379"))
     )
     job_timeout = 3600
+
