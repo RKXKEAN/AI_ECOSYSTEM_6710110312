@@ -47,12 +47,14 @@ async def train_token_classification_task(
 
         # 3. Train Model
         logger.info(f"Fine-tuning NER model with hyperparameters: {hyperparameters}")
-        saved_model_dir = train_ner_model(
+        saved_model_dir, mlflow_run_id = train_ner_model(
             dataset_path=dataset_dir,
             hyperparameters=hyperparameters,
-            logger=logger
+            logger=logger,
+            job_id=job_id,
+            dataset_name=dataset_name,
         )
-        logger.info(f"Training completed. Model saved at '{saved_model_dir}'")
+        logger.info(f"Training completed. Model saved at '{saved_model_dir}', MLflow Run ID: '{mlflow_run_id}'")
 
         # 4. Upload Model and Log to MinIO
         logger.info("Uploading trained model artifacts and log to MinIO...")
@@ -64,13 +66,14 @@ async def train_token_classification_task(
         logger.info(f"Model successfully uploaded to MinIO: '{model_object_name}'")
 
         # 5. Update status to 'complete'
-        update_job_status(job_id, "complete")
-        logger.info(f"=== Job {job_id} successfully finished and status updated to 'complete' ===")
+        update_job_status(job_id, "complete", mlflow_run_id=mlflow_run_id)
+        logger.info(f"=== Job {job_id} successfully finished and status updated to 'complete' (MLflow Run ID: {mlflow_run_id}) ===")
 
         return {
             "job_id": job_id,
             "status": "complete",
             "model_object": model_object_name,
+            "mlflow_run_id": mlflow_run_id,
         }
 
     except Exception as e:

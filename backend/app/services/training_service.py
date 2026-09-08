@@ -99,7 +99,8 @@ def get_job_metrics(db: Session, job_id: str) -> dict:
             "job_id": job.job_id,
             "status": job.status,
             "progress": progress,
-            "dataset_name": dataset_name
+            "dataset_name": dataset_name,
+            "mlflow_run_id": job.mlflow_run_id
         }
         logger.info(f"Retrieved metrics for job {job_id} successfully")
         return metrics

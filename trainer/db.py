@@ -17,27 +17,44 @@ DATABASE_URL = os.getenv(
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 
-def update_job_status(job_id: str, status: str, extra: Optional[Dict[str, Any]] = None) -> None:
+def update_job_status(
+    job_id: str,
+    status: str,
+    mlflow_run_id: Optional[str] = None,
+    extra: Optional[Dict[str, Any]] = None
+) -> None:
     """
     Update the status and updated_at timestamp of a training job in PostgreSQL.
+    Optionally updates mlflow_run_id if provided.
     Uses raw SQL query via SQLAlchemy text() to avoid duplicate ORM models.
     """
     try:
-        query = text("""
-            UPDATE training_jobs
-            SET status = :status, updated_at = :updated_at
-            WHERE job_id = :job_id
-        """)
+        if mlflow_run_id:
+            query = text("""
+                UPDATE training_jobs
+                SET status = :status, mlflow_run_id = :mlflow_run_id, updated_at = :updated_at
+                WHERE job_id = :job_id
+            """)
+            params = {
+                "status": status,
+                "mlflow_run_id": mlflow_run_id,
+                "updated_at": datetime.utcnow(),
+                "job_id": job_id
+            }
+        else:
+            query = text("""
+                UPDATE training_jobs
+                SET status = :status, updated_at = :updated_at
+                WHERE job_id = :job_id
+            """)
+            params = {
+                "status": status,
+                "updated_at": datetime.utcnow(),
+                "job_id": job_id
+            }
         with engine.begin() as conn:
-            result = conn.execute(
-                query,
-                {
-                    "status": status,
-                    "updated_at": datetime.utcnow(),
-                    "job_id": job_id
-                }
-            )
-            logger.info(f"Database: Updated job '{job_id}' status to '{status}' (rows affected: {result.rowcount})")
+            result = conn.execute(query, params)
+            logger.info(f"Database: Updated job '{job_id}' status to '{status}' (mlflow_run_id: {mlflow_run_id}, rows affected: {result.rowcount})")
     except Exception as e:
         logger.error(f"Database error updating job '{job_id}' status: {e}")
         raise e

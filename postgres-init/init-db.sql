@@ -1,1 +1,2 @@
 CREATE DATABASE ai_backend;
+CREATE DATABASE mlflow_db;

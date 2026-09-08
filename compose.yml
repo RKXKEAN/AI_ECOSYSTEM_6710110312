@@ -86,6 +86,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  mlflow:
+    build:
+      context: ./mlflow
+      dockerfile: Dockerfile
+    container_name: mlflow
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password123
+      - MLFLOW_S3_IGNORE_TLS=true
+    depends_on:
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   backend:
     build:
       context: ./backend
@@ -107,6 +131,7 @@ services:
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=my-photos
       - MINIO_SECURE=false
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
     depends_on:
       minio:
         condition: service_healthy
@@ -127,6 +152,11 @@ services:
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=my-photos
       - MINIO_SECURE=false
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password123
+      - MLFLOW_S3_IGNORE_TLS=true
     volumes:
       - ./trainer/logs:/app/logs
     depends_on:
