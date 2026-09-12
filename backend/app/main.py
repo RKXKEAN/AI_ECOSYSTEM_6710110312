@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from app.api.v1.routers import storage, auth, health, inference, training, annotation, models, data, monitoring
 from app.core.database import engine, Base
 from app.models.user import User
@@ -53,6 +54,5 @@ def health_check():
     return {"status": "ok"}
 
 
-
-
-
+# Instrument and expose Prometheus metrics
+Instrumentator().instrument(app).expose(app)
