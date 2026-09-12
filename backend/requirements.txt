@@ -11,3 +11,4 @@ label-studio-sdk
 psycopg2-binary
 redis
 sqlalchemy
+prometheus-fastapi-instrumentator>=8.1.0
