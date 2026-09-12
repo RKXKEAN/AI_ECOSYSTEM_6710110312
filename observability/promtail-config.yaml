@@ -1,4 +1,4 @@
-﻿server:
+server:
   http_listen_port: 9080
   grpc_listen_port: 0
 
@@ -9,10 +9,20 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: app-logs
+  - job_name: backend
     static_configs:
       - targets:
           - localhost
         labels:
-          job: app-logs
-          __path__: /var/log/*log
+          job: backend
+          container: backend
+          __path__: /var/log/backend/*.log
+
+  - job_name: trainer-worker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: trainer-worker
+          container: trainer-worker
+          __path__: /var/log/trainer/*.log

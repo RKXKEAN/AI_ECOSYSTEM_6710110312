@@ -134,6 +134,8 @@ services:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - OTEL_EXPORTER_OTLP_INSECURE=true
+    volumes:
+      - ./backend/logs:/app/logs
     depends_on:
       minio:
         condition: service_healthy
@@ -220,7 +222,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./observability/promtail-config.yaml:/etc/promtail/config.yml
-      - /var/log:/var/log
+      - ./backend/logs:/var/log/backend:ro
+      - ./trainer/logs:/var/log/trainer:ro
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
